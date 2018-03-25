@@ -1,0 +1,51 @@
+#!/usr/bin/env php
+<?php
+
+
+/**
+ * Fast Data Eraser
+ *
+ * @deprecated USE same utility written in Python
+ * Secure wiper/remover for files & directories written in PHP 7
+ * Running on Unix-like OS only.
+ * @author Dmitry Fomin
+ * @license MIT
+ */
+ class FastDataEraser
+ {
+
+
+   /**
+    * public void wipe_file(string $filepath)
+    *
+    * Shredding the file
+    * @param string $filepath - Path to wiping file
+    * @return void - Shredding the file
+    */
+   public function wipe_file(string $filepath)
+   {
+     file_exists($filepath) ? shell_exec("shred -vzun20 '$filepath'") : '';
+   }
+
+   /**
+    * public void wipe_dir(string $dirpath)
+    *
+    * Wiping the folder
+    * @param string $dirpath - Path to wiping folder
+    * @return void - Wiping the folder
+    */
+   public function wipe_dir(string $dirpath)
+   {
+     if (file_exists($dirpath)) {
+       if ($files_in = glob($dirpath . '{,.}[!.]*', GLOB_MARK | GLOB_BRACE)) {
+         foreach ($files_in as $file):
+           is_dir($file) ? $this->wipe_dir($file) : $this->wipe_file($file);
+         endforeach;
+       }
+     }
+     shell_exec("wipe -rfc '$dirpath'");
+   }
+
+ }
+
+is_dir($argv[1]) ? (new FastDataEraser())->wipe_dir($argv[1]) : (new FastDataEraser())->wipe_file($argv[1]);
